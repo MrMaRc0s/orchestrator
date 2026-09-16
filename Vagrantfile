@@ -34,5 +34,9 @@ Vagrant.configure('2') do |config|
       virtualbox.memory = 2048
       virtualbox.cpus = 1
     end
+
+    agent.vm.provision 'k3s-agent', type: 'shell',
+      path: 'Scripts/install-agent.sh',
+      env: { 'K3S_TOKEN' => ENV.fetch('ORCHESTRATOR_JOIN_TOKEN', '') }
   end
 end
