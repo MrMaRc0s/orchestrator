@@ -21,6 +21,7 @@ Vagrant.configure('2') do |config|
     end
 
     master.vm.provision 'k3s-server', type: 'shell', path: 'Scripts/install-master.sh'
+    master.vm.provision 'storage-master', type: 'shell', path: 'Scripts/install-storage-master.sh'
   end
 
   config.vm.define 'Agent' do |agent|
@@ -38,5 +39,6 @@ Vagrant.configure('2') do |config|
     agent.vm.provision 'k3s-agent', type: 'shell',
       path: 'Scripts/install-agent.sh',
       env: { 'K3S_TOKEN' => ENV.fetch('ORCHESTRATOR_JOIN_TOKEN', '') }
+    agent.vm.provision 'storage-agent', type: 'shell', path: 'Scripts/install-storage-agent.sh'
   end
 end
