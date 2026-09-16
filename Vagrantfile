@@ -19,6 +19,8 @@ Vagrant.configure('2') do |config|
       virtualbox.memory = 3072
       virtualbox.cpus = 2
     end
+
+    master.vm.provision 'k3s-server', type: 'shell', path: 'Scripts/install-master.sh'
   end
 
   config.vm.define 'Agent' do |agent|
