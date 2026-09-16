@@ -30,7 +30,7 @@ Vagrant.configure('2') do |config|
     agent.vm.provider 'virtualbox' do |virtualbox|
       virtualbox.name = 'orchestrator-agent'
       virtualbox.memory = 2048
-      virtualbox.cpus = 2
+      virtualbox.cpus = 1
     end
   end
 end
