@@ -8,7 +8,8 @@ if [ ! -f "$env_file" ]; then
 fi
 
 for key in INVENTORY_DB_NAME INVENTORY_DB_USER INVENTORY_DB_PASSWORD \
-  BILLING_DB_NAME BILLING_DB_USER BILLING_DB_PASSWORD; do
+  BILLING_DB_NAME BILLING_DB_USER BILLING_DB_PASSWORD \
+  RABBITMQ_USER RABBITMQ_PASSWORD; do
   if ! grep -Eq "^${key}=.+$" "$env_file"; then
     echo "Missing or empty $key in $env_file" >&2
     exit 1
