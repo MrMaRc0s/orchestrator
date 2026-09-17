@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: inventory-database-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 192.168.58.10
+    path: /srv/orchestrator/nfs/inventory-database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: inventory-database-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: inventory-database-pv
+  resources:
+    requests:
+      storage: 2Gi
