@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbit-queue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbit-queue
+  template:
+    metadata:
+      labels:
+        app: rabbit-queue
+    spec:
+      containers:
+        - name: rabbitmq
+          image: docker.io/cgkaldan/rabbit-queue:1.0
+          ports:
+            - name: amqp
+              containerPort: 5672
+            - name: management
+              containerPort: 15672
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: RABBITMQ_USER
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: RABBITMQ_PASSWORD
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - ping
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 768Mi
