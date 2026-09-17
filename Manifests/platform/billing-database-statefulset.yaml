@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: billing-db
+spec:
+  serviceName: billing-database-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-database
+  template:
+    metadata:
+      labels:
+        app: billing-database
+    spec:
+      containers:
+        - name: postgres
+          image: docker.io/cgkaldan/billing-database:1.0
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: BILLING_DB_NAME
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: BILLING_DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: BILLING_DB_PASSWORD
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+                - -d
+                - postgres
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: database-files
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: database-files
+          persistentVolumeClaim:
+            claimName: billing-database-pvc

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: billing-database-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 192.168.58.10
+    path: /srv/orchestrator/nfs/billing-database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: billing-database-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: billing-database-pv
+  resources:
+    requests:
+      storage: 2Gi

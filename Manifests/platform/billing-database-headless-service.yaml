@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-database-headless
+spec:
+  clusterIP: None
+  selector:
+    app: billing-database
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
