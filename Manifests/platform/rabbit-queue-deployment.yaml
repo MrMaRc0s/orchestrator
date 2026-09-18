@@ -38,6 +38,7 @@ spec:
                 - -q
                 - ping
             periodSeconds: 10
+            timeoutSeconds: 10
           resources:
             requests:
               cpu: 100m
