@@ -16,19 +16,26 @@ require_env() {
   done
 }
 
-apply_platform() {
-  vagrant upload .env /tmp/orchestrator.env Master
-  vagrant upload Scripts/apply-secret-on-master.sh /tmp/apply-secret-on-master.sh Master
-  vagrant ssh Master -c 'sudo bash /tmp/apply-secret-on-master.sh'
-
-  for pattern in '*-storage.yaml' '*-service.yaml' '*-statefulset.yaml' '*-deployment.yaml'; do
-    for manifest in Manifests/platform/$pattern; do
+apply_manifests() {
+  directory="$1"
+  shift
+  for pattern in "$@"; do
+    for manifest in "$directory"/$pattern; do
       [ -f "$manifest" ] || continue
       destination="/tmp/$(basename "$manifest")"
       vagrant upload "$manifest" "$destination" Master
       vagrant ssh Master -c "sudo k3s kubectl apply -f $destination"
     done
   done
+}
+
+apply_platform() {
+  vagrant upload .env /tmp/orchestrator.env Master
+  vagrant upload Scripts/apply-secret-on-master.sh /tmp/apply-secret-on-master.sh Master
+  vagrant ssh Master -c 'sudo bash /tmp/apply-secret-on-master.sh'
+
+  apply_manifests Manifests/platform '*-storage.yaml' '*-service.yaml' '*-statefulset.yaml' '*-deployment.yaml'
+  apply_manifests Manifests/apps '*-deployment.yaml' '*-service.yaml' '*-hpa.yaml' '*-statefulset.yaml'
 }
 
 case "${1:-}" in
