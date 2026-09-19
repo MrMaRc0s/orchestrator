@@ -5,6 +5,7 @@ RUN apt-get update \
         python3 \
         python3-psycopg2 \
         python3-pika \
+        procps \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
