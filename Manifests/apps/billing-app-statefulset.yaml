@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: billing-app
+spec:
+  serviceName: billing-app
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-app
+  template:
+    metadata:
+      labels:
+        app: billing-app
+    spec:
+      containers:
+        - name: billing-app
+          image: docker.io/cgkaldan/billing-app:1.0
+          env:
+            - name: BILLING_DB_HOST
+              value: billing-database
+            - name: BILLING_DB_PORT
+              value: "5432"
+            - name: BILLING_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: BILLING_DB_NAME
+            - name: BILLING_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: BILLING_DB_USER
+            - name: BILLING_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: BILLING_DB_PASSWORD
+            - name: RABBITMQ_HOST
+              value: rabbit-queue
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: RABBITMQ_USER
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-credentials
+                  key: RABBITMQ_PASSWORD
+            - name: BILLING_QUEUE_NAME
+              value: billing_queue
+          readinessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - consumer.py
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
