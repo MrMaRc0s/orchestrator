@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-gateway-app
-          image: docker.io/cgkaldan/api-gateway-app:1.0
+          image: docker.io/cgkaldan/api-gateway-app:1.1
           ports:
             - name: http
               containerPort: 3000

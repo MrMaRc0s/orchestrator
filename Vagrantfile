@@ -13,6 +13,11 @@ Vagrant.configure('2') do |config|
       host: 16443,
       host_ip: '127.0.0.1',
       id: 'k3s_api'
+    master.vm.network 'forwarded_port',
+      guest: 3000,
+      host: 3000,
+      host_ip: '127.0.0.1',
+      id: 'gateway_http'
 
     master.vm.provider 'virtualbox' do |virtualbox|
       virtualbox.name = 'orchestrator-master'

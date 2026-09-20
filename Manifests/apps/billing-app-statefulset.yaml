@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: billing-app
-          image: docker.io/cgkaldan/billing-app:1.0
+          image: docker.io/cgkaldan/billing-app:1.1
           env:
             - name: BILLING_DB_HOST
               value: billing-database
