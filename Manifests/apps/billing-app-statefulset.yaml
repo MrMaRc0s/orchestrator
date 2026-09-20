@@ -50,15 +50,8 @@ spec:
                 secretKeyRef:
                   name: platform-credentials
                   key: RABBITMQ_PASSWORD
-            - name: BILLING_QUEUE_NAME
+            - name: RABBITMQ_QUEUE
               value: billing_queue
-          readinessProbe:
-            exec:
-              command:
-                - pgrep
-                - -f
-                - consumer.py
-            periodSeconds: 10
           resources:
             requests:
               cpu: 100m
