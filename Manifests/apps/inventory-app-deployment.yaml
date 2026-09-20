@@ -19,6 +19,8 @@ spec:
             - name: http
               containerPort: 8080
           env:
+            - name: INVENTORY_PORT
+              value: "8080"
             - name: INVENTORY_DB_HOST
               value: inventory-database
             - name: INVENTORY_DB_PORT
@@ -40,7 +42,7 @@ spec:
                   key: INVENTORY_DB_PASSWORD
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /api/movies
               port: 8080
             periodSeconds: 5
           resources:
