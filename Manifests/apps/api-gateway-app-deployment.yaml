@@ -19,7 +19,9 @@ spec:
             - name: http
               containerPort: 3000
           env:
-            - name: INVENTORY_APP_URL
+            - name: GATEWAY_PORT
+              value: "3000"
+            - name: INVENTORY_API_URL
               value: http://inventory-app:8080
             - name: RABBITMQ_HOST
               value: rabbit-queue
@@ -35,7 +37,7 @@ spec:
                 secretKeyRef:
                   name: platform-credentials
                   key: RABBITMQ_PASSWORD
-            - name: BILLING_QUEUE_NAME
+            - name: RABBITMQ_QUEUE
               value: billing_queue
           readinessProbe:
             httpGet:
