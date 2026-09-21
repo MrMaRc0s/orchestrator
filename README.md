@@ -34,7 +34,7 @@ is delayed until the consumer is scaled back up.
 | --- | --- | --- |
 | `inventory-app` | Deployment + HPA | Flask + SQLAlchemy/psycopg, port `8080`, CPU target 60% (1-3 replicas) |
 | `api-gateway-app` | Deployment + HPA | Flask, port `3000`, exposed via a `LoadBalancer` Service, CPU target 60% (1-3 replicas) |
-| `billing-app` | StatefulSet (1 replica) | pika consumer, no HTTP port, reads `billing_queue` |
+| `billing-app` | StatefulSet (1 replica) | pika consumer reading `billing_queue`; internal health check on port `8080` |
 | `inventory-database` | StatefulSet (1 replica) | PostgreSQL, DB `movies_db` |
 | `billing-database` | StatefulSet (1 replica) | PostgreSQL, DB `orders` |
 | `rabbit-queue` | Deployment | RabbitMQ, queue `billing_queue` |
@@ -89,18 +89,20 @@ consumed by every workload via `secretKeyRef` — no plaintext credentials
 ever appear in a tracked manifest.
 
 Build and push the images from the repository root before creating the cluster.
-The three restored application images use tag `1.1`; the database and RabbitMQ
-images use tag `1.0`. Authenticate with `docker login` first:
+Inventory and Gateway use tag `1.1`, Billing uses tag `1.2`, and the database
+and RabbitMQ images use tag `1.0`. Authenticate with `docker login` first:
 
 ```sh
 for service in inventory-database billing-database rabbit-queue; do
   docker build -t "cgkaldan/$service:1.0" "srcs/$service"
   docker push "cgkaldan/$service:1.0"
 done
-for service in inventory-app billing-app api-gateway-app; do
+for service in inventory-app api-gateway-app; do
   docker build -t "cgkaldan/$service:1.1" "srcs/$service"
   docker push "cgkaldan/$service:1.1"
 done
+docker build -t cgkaldan/billing-app:1.2 srcs/billing-app
+docker push cgkaldan/billing-app:1.2
 ```
 
 ## Usage
@@ -168,13 +170,18 @@ database before and after scaling back to `1`:
 
 ```sh
 kubectl scale statefulset billing-app --replicas=0
+kubectl wait --for=delete pod/billing-app-0 --timeout=120s
 curl -i -X POST http://127.0.0.1:3000/api/billing/ -H 'Content-Type: application/json' \
   -d '{"user_id":"22","number_of_items":"10","total_amount":"50"}'
+kubectl exec deployment/rabbit-queue -- rabbitmqctl -q list_queues name messages_ready consumers
 kubectl exec billing-db-0 -- psql -U postgres -d orders -c 'TABLE orders;'
 kubectl scale statefulset billing-app --replicas=1
 kubectl rollout status statefulset/billing-app
 kubectl exec billing-db-0 -- psql -U postgres -d orders -c 'TABLE orders;'
 ```
+
+The queue should show one ready message and zero consumers while Billing is
+stopped. The order appears in PostgreSQL after Billing restarts.
 
 ## Notes
 

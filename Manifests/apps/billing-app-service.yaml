@@ -6,3 +6,7 @@ spec:
   clusterIP: None
   selector:
     app: billing-app
+  ports:
+    - name: health
+      port: 8080
+      targetPort: health

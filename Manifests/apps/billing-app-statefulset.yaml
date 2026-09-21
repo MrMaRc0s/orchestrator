@@ -15,7 +15,10 @@ spec:
     spec:
       containers:
         - name: billing-app
-          image: docker.io/cgkaldan/billing-app:1.1
+          image: docker.io/cgkaldan/billing-app:1.2
+          ports:
+            - name: health
+              containerPort: 8080
           env:
             - name: BILLING_DB_HOST
               value: billing-database
@@ -52,6 +55,11 @@ spec:
                   key: RABBITMQ_PASSWORD
             - name: RABBITMQ_QUEUE
               value: billing_queue
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            periodSeconds: 5
           resources:
             requests:
               cpu: 100m

@@ -10,6 +10,7 @@ from app.config.database import (
 from app.config.rabbitmq import create_rabbitmq_connection
 from app.config.settings import load_settings
 from app.consumers import create_message_handler
+from app.health import start_health_server
 
 
 LOGGER = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ def main() -> None:
     engine = create_database_engine(settings)
     connection = None
     channel = None
+    health_server = None
 
     signal.signal(signal.SIGTERM, request_shutdown)
 
@@ -41,6 +43,7 @@ def main() -> None:
             on_message_callback=create_message_handler(session_factory),
             auto_ack=False,
         )
+        health_server = start_health_server()
 
         LOGGER.info(
             "Billing consumer is waiting on queue %s",
@@ -50,6 +53,9 @@ def main() -> None:
     except KeyboardInterrupt:
         LOGGER.info("Stopping Billing consumer")
     finally:
+        if health_server is not None:
+            health_server.shutdown()
+            health_server.server_close()
         if channel is not None and channel.is_open:
             channel.stop_consuming()
         if connection is not None and connection.is_open:
