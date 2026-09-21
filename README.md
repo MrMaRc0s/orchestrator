@@ -46,6 +46,10 @@ without losing data. The Master remains a storage single point of failure;
 K3s's default `local-path` storage class is intentionally not used for the
 database claims.
 
+Both VMs have a NAT interface and a private `192.168.58.0/24` interface.
+The K3s install scripts pin Flannel to `eth1` (the private interface), so
+cross-node Pod traffic does not use VirtualBox's duplicate NAT address.
+
 ## Repository layout
 
 ```
